@@ -2,7 +2,7 @@
 
 Aquí documento proyectos enfocados en la detección de amenazas, remediación de vulnerabilidades y la implementación de soluciones de seguridad defensiva (Blue Team).
 
-🚀 Proyecto Destacado: Detección de Secretos con Nosey Parker (AppSec)
+🚀 Detección de Secretos con Nosey Parker (AppSec)
 
 📋 Descripción
 
