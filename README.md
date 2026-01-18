@@ -32,7 +32,7 @@ Se configuró un entorno WSL ,Windows Subsystem for Linux, utilizando la distrib
 
 Instalación y configuración de la herramienta para escaneo de alta velocidad basado en entropía:
 
-# Instalación de Nosey Parker en WSL
+Instalación de Nosey Parker en WSL
 wget [https://github.com/praetorian-inc/noseyparker/releases/latest/download/noseyparker_x86_64.zip](https://github.com/praetorian-inc/noseyparker/releases/latest/download/noseyparker_x86_64.zip)
 unzip noseyparker_x86_64.zip
 chmod +x noseyparker
