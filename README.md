@@ -2,56 +2,72 @@
 
 Aquí documento proyectos enfocados en la detección de amenazas, remediación de vulnerabilidades y la implementación de soluciones de seguridad defensiva (Blue Team).
 
-🚀 Detección de Secretos con Nosey Parker (AppSec)
+# 🚀Gobernanza y Gestión del SIEM (Ecosistema Wazuh)
 
-📋 Descripción
+Enfoque: Monitoreo centralizado (HIDS) y automatización de la flota de agentes.
 
-Implementación de un flujo de auditoría técnica para la identificación de credenciales hardcodeadas (secrets), tokens de API y llaves privadas en entornos de desarrollo y sistemas de archivos.
+1.1 Actualización y Escalabilidad del Stack (Manager/Indexers)
 
-Herramientas: Nosey Parker, WSL (Ubuntu Linux), Git.
+Problema: Desfase de versiones entre el Wazuh Manager y los Indexers, generando inconsistencias en el parseo de logs y pérdida de compatibilidad con nuevas reglas.
 
-Enfoque: Prevención de fugas de información (Secret Leaks) y Hardening de repositorios.
+Riesgo: Degradación de la visibilidad y exposición del SIEM a vulnerabilidades no parcheadas.
 
-⚠️ El Problema
+Acción Técnica: Ejecución de Upgrading Path jerárquico (Indexer -> Server -> Dashboard) con snapshots preventivos. Implementación de actualizaciones remotas de agentes mediante paquetes WPK (Wazuh Packages), eliminando la necesidad de intervención manual por SSH/RDP.
 
-En el ciclo de vida del desarrollo de software, es crítico evitar que credenciales sensibles lleguen a repositorios o entornos productivos. Las llaves hardcodeadas son uno de los vectores más utilizados por atacantes para realizar movimientos laterales y exfiltración de datos.
+Resultado: Disponibilidad del 99.9% durante mantenimiento y estandarización total de versiones.
 
-🛡️ Riesgo Identificado
+1.2 Configuración de Políticas y Segmentación (SCA)
 
-Impacto: Compromiso de infraestructura cloud (AWS/Azure), acceso no autorizado a bases de datos y exposición de servicios de terceros.
+Problema: Políticas de monitoreo genéricas que generaban carga innecesaria en servidores con distintos roles (Web vs DB).
 
-Criticidad: Alta (basado en el potencial de escalada de privilegios).
+Acción Técnica: Configuración de agent.conf centralizados segmentados por etiquetas. Despliegue de políticas de Security Configuration Assessment (SCA) para verificar el hardening del SO en tiempo real (NIST/CIS).
 
-🛠️ Acción Técnica 
+Resultado: Precisión en las alertas según el perfil de riesgo y reducción drástica del ruido en los logs.
 
-1. Preparación del Entorno WSL2
+1.3 Optimización de FIM (File Integrity Monitoring)
 
-Se configuró un entorno WSL ,Windows Subsystem for Linux, utilizando la distribución Ubuntu para ejecutar herramientas de seguridad nativas de Linux en un host Windows, garantizando compatibilidad y rendimiento.
+Problema: Fatiga de alertas (Alert Fatigue) por cambios legítimos en archivos temporales detectados por el módulo syscheck.
 
-2. Despliegue de Nosey Parker
+Acción Técnica: Implementación de monitoreo en tiempo real vía inotify (Linux) y ReadDirectoryChangesW (Windows). Optimización de bloques <ignore> quirúrgicos y activación de check_all="yes" solo en rutas de configuración crítica.
 
-Instalación y configuración de la herramienta para escaneo de alta velocidad basado en entropía:
+Resultado: Reducción del 90% en falsos positivos, permitiendo foco total en cambios no autorizados en binarios de sistema.
 
-Instalación de Nosey Parker en WSL
-wget [https://github.com/praetorian-inc/noseyparker/releases/latest/download/noseyparker_x86_64.zip](https://github.com/praetorian-inc/noseyparker/releases/latest/download/noseyparker_x86_64.zip)
-unzip noseyparker_x86_64.zip
-chmod +x noseyparker
-sudo mv noseyparker /usr/local/bin/
+# 💻Gestión de Vulnerabilidades y Remediación (AppSec)
 
-3. Proceso de Auditoría
+Enfoque: Ciclo de vida completo del riesgo y defensa en profundidad.
 
-Ejecución de escaneos profundos sobre repositorios locales buscando patrones de secretos conocidos (Live Secrets) y firmas de proveedores:
+2.1 Ciclo de Vida de la Remediación
 
-# Escaneo de un directorio o repositorio
-noseyparker scan --datastore my_secrets_db /ruta/al/proyecto
-# Reporte de hallazgos
-noseyparker report --datastore my_secrets_db
+Metodología: Detección (Vulnerability Detector) -> Validación manual (PoC) -> Re-cálculo de criticidad (CVSS) -> Remediación -> Verificación (Rescan).
 
+Resultado: Establecimiento de un SLA de remediación para vulnerabilidades Críticas/Altas y reducción medible del riesgo acumulado.
 
-✅ Resultado y Remediación
+2.2 Mitigación CVE-2025-13836 (DoS en Python)
 
-Detección: Se identifican tokens de API y claves privadas en archivos de configuración de entornos de prueba.
+Problema: Detección de vulnerabilidad en el módulo http.client de Python 3.12.3 en estaciones de trabajo.
 
-Remediación Realizada: Se procede a la rotación inmediata de secretos (invalidación y generación de nuevos tokens) y la limpieza del historial de Git mediante herramientas de reescritura de commits.
+Riesgo: Denegación de Servicio (DoS) por agotamiento de memoria virtual al procesar respuestas maliciosas.
 
-Prevención: Se implementaron recomendaciones de uso de .gitignore y sugerencias de integración de pre-commit hooks para automatizar la detección antes del push al repositorio.
+Acción Técnica: Validación del uso de la versión vulnerable y actualización forzada al intérprete 3.14.2 (parche de diciembre 2025).
+
+Hardening Adicional: Implementación de límites de lectura en el parámetro amount de la función .read() como medida de defensa en profundidad.
+
+Resultado: Eliminación total del vector de ataque y cierre formal de la alerta en el SIEM.
+
+# 🔑Detección de Secretos con Nosey Parker
+
+Enfoque: Prevención de fuga de credenciales (Secrets Leaks) en entornos de desarrollo.
+
+Implementación: Uso de Nosey Parker sobre WSL (Ubuntu Linux) para escaneo de alta velocidad basado en entropía.
+
+Acción: Auditoría de repositorios locales buscando tokens de API, llaves privadas y "Live Secrets".
+
+Remediación: Rotación de credenciales expuestas y limpieza de historial mediante herramientas de reescritura de commits.
+
+Prevención: Configuración de .gitignore y recomendación de pre-commit hooks.
+
+# 🎯Security Awareness & Ingeniería Social
+
+Acción: Diseño de campañas de simulación de Phishing y cursos de capacitación interna.
+
+Resultado: Mejora medible en la tasa de reporte de correos sospechosos y fortalecimiento de la cultura de seguridad
